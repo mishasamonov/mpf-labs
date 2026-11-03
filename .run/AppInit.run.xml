@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="AppInit MPF (local PostgreSQL)" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="sumdu.edu.ua.web.AppInit" />
+    <module name="web" />
+    <option name="VM_PARAMETERS" value="-Dfile.encoding=UTF-8" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/web" />
+    <option name="PROGRAM_PARAMETERS" value="--spring.profiles.active=local" />
+    <method v="2"><option name="Make" enabled="true" /></method>
+  </configuration>
+</component>

@@ -1,0 +1,87 @@
+### Lab 10: CommentService.delete, GlobalApiExceptionHandler and the AOP log.
+### Run the requests one after another: 1-3 sign in as ADMIN (session cookie + CSRF token).
+
+### 1. Login page: take the CSRF token
+GET http://localhost:8088/login
+
+> {%
+  client.global.set("csrf", response.body.match(/name="_csrf" value="([^"]+)"/)[1]);
+%}
+
+### 2. Sign in as ADMIN (the cookie jar keeps JSESSIONID)
+POST http://localhost:8088/login
+Content-Type: application/x-www-form-urlencoded
+
+email=admin@bookshelf.test&password=admin123&_csrf={{csrf}}
+
+### 3. Comments of book 1: new CSRF token after login, the oldest seed comment
+GET http://localhost:8088/comments?bookId=1
+
+> {%
+  const html = response.body;
+  client.global.set("csrf", html.match(/name="_csrf" value="([^"]+)"/)[1]);
+  const forms = [...html.matchAll(/name="commentId" value="(\d+)">\s*<input type="hidden" name="createdAt" value="([^"]+)"/g)];
+  const last = forms[forms.length - 1];
+  client.global.set("oldId", last[1]);
+  client.global.set("oldCreatedAt", last[2]);
+  client.log("Oldest comment: id=" + last[1] + ", createdAt=" + last[2]);
+%}
+
+### 4. Invalid bookId -> 400 + JSON {"error": "..."}
+POST http://localhost:8088/comments/delete
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+bookId=0&commentId=1&createdAt={{$isoTimestamp}}&_csrf={{csrf}}
+
+### 5. Missing createdAt -> 400 + JSON
+POST http://localhost:8088/comments/delete
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+bookId=1&commentId=1&_csrf={{csrf}}
+
+### 6. Seed comment older than 24 hours -> 400 + JSON
+POST http://localhost:8088/comments/delete
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+bookId=1&commentId={{oldId}}&createdAt={{oldCreatedAt}}&_csrf={{csrf}}
+
+### 7. Forged createdAt for the same old comment -> 400 + JSON (the stored time wins)
+POST http://localhost:8088/comments/delete
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+bookId=1&commentId={{oldId}}&createdAt={{$isoTimestamp}}&_csrf={{csrf}}
+
+### 8. Book that does not exist -> 404 + JSON
+POST http://localhost:8088/comments/delete
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+bookId=999999&commentId=1&createdAt={{$isoTimestamp}}&_csrf={{csrf}}
+
+### 9. Add a fresh comment as ADMIN
+# @no-redirect
+POST http://localhost:8088/comments?bookId=1
+Content-Type: application/x-www-form-urlencoded
+
+text=Свіжий коментар для перевірки видалення (лаба 10)&_csrf={{csrf}}
+
+### 10. Newest comment of book 1 (sorted by createdAt desc)
+GET http://localhost:8088/comments?bookId=1
+
+> {%
+  const first = response.body.match(/name="commentId" value="(\d+)">\s*<input type="hidden" name="createdAt" value="([^"]+)"/);
+  client.global.set("newId", first[1]);
+  client.global.set("newCreatedAt", first[2]);
+  client.log("Newest comment: id=" + first[1] + ", createdAt=" + first[2]);
+%}
+
+### 11. Valid delete -> 302 to /comments?bookId=1, see the AOP log in the AppInit console
+# @no-redirect
+POST http://localhost:8088/comments/delete
+Content-Type: application/x-www-form-urlencoded
+
+bookId=1&commentId={{newId}}&createdAt={{newCreatedAt}}&_csrf={{csrf}}

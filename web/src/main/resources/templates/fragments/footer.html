@@ -1,0 +1,5 @@
+<footer xmlns:th="http://www.thymeleaf.org" th:fragment="footer" class="site-footer">
+  <span>BookApp · Самонов Михайло · Spring Security</span>
+  <span th:if="${uri != null}" th:text="#{footer.page(${uri})}"></span>
+  <span th:if="${currentTime != null}" th:text="#{footer.time(${currentTime})}"></span>
+</footer>

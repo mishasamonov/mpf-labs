@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments/head :: head(#{nav.users})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main>
+  <p class="eyebrow">ADMIN</p>
+  <h1 th:text="#{nav.users}">Користувачі</h1>
+  <p class="intro" th:text="#{users.intro}"></p>
+  <p class="success" role="status" th:if="${roleChanged}" th:text="#{notice.roleChanged}"></p>
+  <p class="error-box" role="alert" th:if="${ownRole}" th:text="#{notice.ownRole}"></p>
+  <table>
+    <thead><tr><th>ID</th><th th:text="#{users.email}"></th><th th:text="#{users.nickname}"></th>
+      <th th:text="#{users.role}"></th><th th:text="#{users.verified}"></th>
+      <th th:text="#{label.comments}"></th></tr></thead>
+    <tbody><tr th:each="u : ${users}">
+      <td th:text="${u.id}"></td>
+      <td class="book-title" th:text="${u.email}"></td>
+      <td th:text="${u.nickname}"></td>
+      <td>
+        <form class="role-form" method="post" th:action="@{/users/{id}/role(id=${u.id})}">
+          <select name="role" th:aria-label="#{users.role}">
+            <option th:each="r : ${roles}" th:value="${r}" th:text="${r}" th:selected="${r == u.role}"></option>
+          </select>
+          <button class="secondary" th:text="#{users.changeRole}">Змінити</button>
+        </form>
+      </td>
+      <td><span th:class="${u.verified} ? 'badge ok' : 'badge no'"
+                th:text="${u.verified} ? #{users.yes} : #{users.no}"></span></td>
+      <td><a th:href="@{/users/{id}/comments(id=${u.id})}" th:text="#{users.showComments}"></a></td>
+    </tr></tbody>
+  </table>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

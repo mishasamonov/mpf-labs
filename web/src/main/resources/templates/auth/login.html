@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments/head :: head(#{auth.login.title})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main class="narrow auth">
+  <p class="eyebrow">Spring Security</p>
+  <h1 th:text="#{auth.login.title}">Вхід до каталогу</h1>
+  <p class="intro" th:text="#{auth.login.intro}"></p>
+  <p class="error-box" role="alert" th:if="${param.error}" th:text="#{auth.login.error}"></p>
+  <p class="error-box" role="alert" th:if="${param.unverified}" th:text="#{auth.login.unverified}"></p>
+  <p class="success" role="status" th:if="${param.logout}" th:text="#{auth.login.logout}"></p>
+  <!-- Spring Security processes POST /login: usernameParameter("email"), passwordParameter("password"). -->
+  <form class="stack card" method="post" th:action="@{/login}">
+    <label for="email" th:text="#{auth.email}">Email</label>
+    <input id="email" name="email" type="email" required autofocus autocomplete="username"
+           placeholder="name@bookshelf.test">
+    <label for="password" th:text="#{auth.password}">Пароль</label>
+    <input id="password" name="password" type="password" required autocomplete="current-password">
+    <button type="submit" th:text="#{auth.login.submit}">Увійти</button>
+  </form>
+  <p class="muted"><span th:text="#{auth.login.noAccount}">Ще немає акаунта?</span>
+    <a th:href="@{/register}" th:text="#{nav.register}">Реєстрація</a></p>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

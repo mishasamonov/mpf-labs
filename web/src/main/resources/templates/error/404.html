@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments/head :: head(#{error.notFound.title})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main class="narrow error-page">
+  <p class="status-code">404</p>
+  <p class="eyebrow">Not Found</p>
+  <h1 th:text="#{error.notFound.title}">Сторінку не знайдено</h1>
+  <p class="intro" th:text="${messageKey != null ? #messages.msg(messageKey) : #messages.msg('error.notFound.text')}"></p>
+  <a class="button" th:href="@{/books}" th:text="#{comments.back}">До каталогу</a>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

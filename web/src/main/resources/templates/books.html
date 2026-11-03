@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:lang="${#locale.language}">
+<head th:replace="~{fragments/head :: head(#{title.books})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main>
+  <p class="eyebrow" th:text="#{catalog.section}">Бібліотека</p>
+  <p class="error" th:if="${mailFailed}" th:text="#{mail.failed}"></p>
+<h1 th:text="#{title.books}">Каталог книг</h1>
+  <p class="intro" th:text="#{catalog.intro}">Обирайте книгу та діліться враженнями.</p>
+  <p class="success" role="status" th:if="${bookAdded}" th:text="#{notice.bookAdded}"></p>
+  <p class="success" role="status" th:if="${bookUpdated}" th:text="#{notice.bookUpdated}"></p>
+  <p class="success" role="status" th:if="${bookDeleted}" th:text="#{notice.bookDeleted}"></p>
+  <p class="notice" sec:authorize="!hasRole('ADMIN')" th:text="#{catalog.readOnly}"></p>
+  <form class="search" method="get" th:action="@{/books}">
+    <label for="q" th:text="#{catalog.search}">Пошук</label>
+    <input id="q" name="q" th:value="${q}" maxlength="255" th:placeholder="#{catalog.searchHint}">
+    <button th:text="#{catalog.find}">Знайти</button>
+    <a th:href="@{/books}" th:text="#{catalog.reset}">Усі книги</a>
+  </form>
+  <p class="empty" th:if="${#lists.isEmpty(books)}" th:text="#{label.noBooks}">Немає книг</p>
+  <section th:unless="${#lists.isEmpty(books)}">
+    <p class="muted" th:text="#{catalog.total(${catalogPage.total})}"></p>
+    <table>
+      <thead><tr><th th:text="#{label.title}"></th><th th:text="#{label.author}"></th>
+        <th th:text="#{label.year}"></th><th th:text="#{label.comments}"></th>
+        <th sec:authorize="hasRole('ADMIN')" th:text="#{label.actions}"></th></tr></thead>
+      <tbody><tr th:each="book : ${books}">
+        <td class="book-title" th:text="${book.title}"></td>
+        <td th:text="${book.author}"></td><td th:text="${book.pubYear}"></td>
+        <td><a th:href="@{/comments(bookId=${book.id})}" th:text="#{comments.open}"></a></td>
+        <!-- Administrator buttons: hidden for USER, and the routes themselves return 403. -->
+        <td class="row-actions" sec:authorize="hasRole('ADMIN')">
+          <a th:href="@{/books/{id}/edit(id=${book.id})}" th:text="#{book.edit}"></a>
+          <form method="post" th:action="@{/books/{id}/delete(id=${book.id})}">
+            <button class="secondary danger" th:text="#{book.delete}"></button>
+          </form>
+        </td>
+      </tr></tbody>
+    </table>
+    <nav class="pagination" th:if="${catalogPage.totalPages() > 1}">
+      <a th:if="${catalogPage.request.page > 0}"
+         th:href="@{/books(q=${q},page=${catalogPage.request.page - 1})}" th:text="#{page.previous}"></a>
+      <span th:text="#{page.number(${catalogPage.request.page + 1},${catalogPage.totalPages()})}"></span>
+      <a th:if="${catalogPage.request.page + 1 < catalogPage.totalPages()}"
+         th:href="@{/books(q=${q},page=${catalogPage.request.page + 1})}" th:text="#{page.next}"></a>
+    </nav>
+  </section>
+  <a class="button" sec:authorize="hasRole('ADMIN')" th:href="@{/books/add}" th:text="#{form.add}">Додати книгу</a>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments/head :: head(#{auth.confirmError.title})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main class="narrow auth">
+  <p class="eyebrow">/confirm</p>
+  <h1 th:text="#{auth.confirmError.title}">Посилання недійсне</h1>
+  <p class="error-box" role="alert" th:text="#{auth.confirmError.text}"></p>
+  <a class="button" th:href="@{/register}" th:text="#{nav.register}">Реєстрація</a>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

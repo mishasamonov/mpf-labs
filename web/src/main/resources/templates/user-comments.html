@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:lang="${#locale.language}">
+<head th:replace="~{fragments/head :: head(#{title.userComments(${username})})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main>
+  <a sec:authorize="hasRole('ADMIN')" th:href="@{/users}" th:text="#{users.back}"></a>
+  <a sec:authorize="!hasRole('ADMIN')" th:href="@{/books}" th:text="#{comments.back}"></a>
+  <h1 th:text="#{title.userComments(${username})}">Коментарі користувача</h1>
+  <p class="intro" th:text="#{users.commentsTotal(${#lists.size(comments)})}"></p>
+  <p class="empty" th:if="${#lists.isEmpty(comments)}" th:text="#{comments.empty}"></p>
+  <ul class="user-comments" th:unless="${#lists.isEmpty(comments)}">
+    <li class="comment" th:each="c : ${comments}">
+      <p><strong th:text="${#temporals.format(c.createdAt.atZone(T(java.time.ZoneId).of('Europe/Kyiv')), 'dd.MM.yyyy HH:mm')}"></strong></p>
+      <p class="comment-text" th:text="${c.text}"></p>
+      <p><span th:text="#{users.book}">Книга:</span>
+        <a th:href="@{/books/{id}(id=${c.book.id})}" th:text="${c.book.title}"></a>
+        <span class="muted" th:text="'#' + ${c.book.id} + ' · ' + ${c.book.author}"></span></p>
+    </li>
+  </ul>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

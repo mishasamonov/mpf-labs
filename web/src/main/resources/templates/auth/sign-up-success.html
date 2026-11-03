@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments/head :: head(#{auth.registered.title})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main class="narrow auth">
+  <p class="eyebrow">REGISTERED</p>
+  <h1 th:text="#{auth.registered.title}">Перевірте пошту</h1>
+  <p class="success" role="status" th:text="#{auth.registered.text(${email})}"></p>
+  <p class="intro" th:text="#{auth.registered.next}"></p>
+  <a class="button" th:href="@{/login}" th:text="#{nav.login}">Увійти</a>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

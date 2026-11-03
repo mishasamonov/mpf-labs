@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments/head :: head(#{auth.register.title})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main class="narrow auth">
+  <p class="eyebrow">Spring Security</p>
+  <h1 th:text="#{auth.register.title}">Реєстрація</h1>
+  <p class="intro" th:text="#{auth.register.intro}"></p>
+  <p class="error-box" role="alert" th:if="${error}" th:text="${error}"></p>
+  <form class="stack card" method="post" th:action="@{/register}" th:object="${user}">
+    <label for="email" th:text="#{auth.email}">Email</label>
+    <input type="email" th:field="*{email}" required maxlength="128" autocomplete="email"
+           th:errorclass="invalid" placeholder="name@bookshelf.test">
+    <p class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+    <label for="nickname" th:text="#{auth.nickname}">Нікнейм</label>
+    <input th:field="*{nickname}" maxlength="128" autocomplete="nickname" th:errorclass="invalid">
+    <p class="muted" th:text="#{auth.register.nicknameHint}"></p>
+    <p class="error" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></p>
+    <label for="password" th:text="#{auth.password}">Пароль</label>
+    <!-- No th:field: the password is never written back into the page. -->
+    <input id="password" name="password" type="password" required minlength="6" maxlength="72"
+           autocomplete="new-password" th:classappend="${#fields.hasErrors('password')} ? 'invalid'">
+    <p class="muted" th:text="#{auth.register.passwordHint}"></p>
+    <p class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+    <button type="submit" th:text="#{auth.register.submit}">Зареєструватися</button>
+  </form>
+  <p class="muted"><span th:text="#{auth.register.hasAccount}">Вже зареєстровані?</span>
+    <a th:href="@{/login}" th:text="#{nav.login}">Увійти</a></p>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

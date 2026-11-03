@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:lang="${#locale.language}">
+<head th:replace="~{fragments/head :: head(#{label.comments})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main>
+  <a th:href="@{/books}" th:text="#{comments.back}"></a>
+  <h1 th:text="${book.title}"></h1>
+  <p class="intro"><span th:text="${book.author}"></span> · <span th:text="${book.pubYear}"></span></p>
+  <p class="success" role="status" th:if="${commentAdded}" th:text="#{notice.commentAdded}"></p>
+  <p class="success" role="status" th:if="${commentDeleted}" th:text="#{notice.commentDeleted}"></p>
+  <p class="error-box" id="delete-error" role="alert" hidden></p>
+  <h2 th:text="#{label.comments}"></h2>
+  <p class="empty" th:if="${#lists.isEmpty(comments)}" th:text="#{comments.empty}"></p>
+  <article class="comment" th:each="comment : ${comments}">
+    <a th:if="${comment.userId != null}" class="comment-author"
+       th:href="@{/users/{id}/comments(id=${comment.userId})}" th:text="${comment.author}"></a>
+    <strong th:unless="${comment.userId != null}" th:text="${comment.author}"></strong>
+    <time class="muted" th:text="${#temporals.format(comment.createdAt.atZone(T(java.time.ZoneId).of('Europe/Kyiv')), 'dd.MM.yyyy HH:mm')}"></time>
+    <p class="comment-text" th:text="${comment.text}"></p>
+    <form method="post" th:action="@{/comments/delete}" sec:authorize="hasRole('ADMIN')"
+          class="delete-comment">
+      <input type="hidden" name="bookId" th:value="${book.id}">
+      <input type="hidden" name="commentId" th:value="${comment.id}">
+      <input type="hidden" name="createdAt" th:value="${comment.createdAt}">
+      <button class="secondary danger" th:text="#{comments.delete}"></button>
+    </form>
+  </article>
+  <nav class="pagination" th:if="${commentPage.totalPages() > 1}">
+    <a th:if="${commentPage.request.page > 0}"
+       th:href="@{/comments(bookId=${book.id},page=${commentPage.request.page - 1})}" th:text="#{page.previous}"></a>
+    <span th:text="#{page.number(${commentPage.request.page + 1},${commentPage.totalPages()})}"></span>
+    <a th:if="${commentPage.request.page + 1 < commentPage.totalPages()}"
+       th:href="@{/comments(bookId=${book.id},page=${commentPage.request.page + 1})}" th:text="#{page.next}"></a>
+  </nav>
+  <section class="narrow comment-form" sec:authorize="hasAnyRole('USER', 'ADMIN')">
+    <h2 th:text="#{comments.add}"></h2>
+    <p class="muted" th:text="#{comments.as(${currentUserNickname != null ? currentUserNickname : #authentication.name})}"></p>
+    <form method="post" th:action="@{/comments(bookId=${book.id})}" th:object="${commentForm}" class="stack">
+      <label for="text" th:text="#{comments.text}"></label>
+      <textarea th:field="*{text}" required maxlength="1000" rows="3"></textarea>
+      <p class="error" th:if="${#fields.hasErrors('text')}" th:errors="*{text}"></p>
+      <button th:text="#{comments.add}"></button>
+    </form>
+  </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script sec:authorize="hasRole('ADMIN')">
+  // Lab 10: the delete form is sent with fetch, so the JSON {"error": "..."} of
+  // GlobalApiExceptionHandler is shown above the list instead of a raw JSON page.
+  document.querySelectorAll('form.delete-comment').forEach(form =>
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const box = document.getElementById('delete-error');
+      const response = await fetch(form.action, {
+        method: 'POST', body: new URLSearchParams(new FormData(form)),
+        headers: {'Accept': 'application/json'}, redirect: 'manual'});
+      if (response.type === 'opaqueredirect') { location.reload(); return; } // 302 = deleted.
+      const body = await response.json().catch(() => ({error: 'HTTP ' + response.status}));
+      box.textContent = response.status + ': ' + body.error;
+      box.hidden = false;
+      box.scrollIntoView({behavior: 'smooth', block: 'center'});
+    }));
+</script>
+</body>
+</html>

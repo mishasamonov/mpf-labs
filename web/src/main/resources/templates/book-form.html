@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}"
+      th:with="editing=${editId != null}">
+<head th:replace="~{fragments/head :: head(${editing} ? #{title.editBook} : #{title.addBook})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main class="narrow">
+  <p class="eyebrow" th:text="#{catalog.section}"></p>
+  <h1 th:text="${editing} ? #{title.editBook} : #{title.addBook}">Додати книгу</h1>
+  <p class="intro" th:text="#{form.intro}"></p>
+  <form th:action="${editing} ? @{/books/{id}/edit(id=${editId})} : @{/books}"
+        th:object="${bookForm}" method="post" class="stack">
+    <input type="hidden" th:field="*{id}">
+    <p class="error" th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></p>
+    <p class="error" role="alert" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></p>
+    <label for="title" th:text="#{label.title}">Назва</label>
+    <input th:field="*{title}" required maxlength="255" th:errorclass="invalid">
+    <p class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+    <label for="author" th:text="#{label.author}">Автор</label>
+    <input th:field="*{author}" required maxlength="255" th:errorclass="invalid">
+    <p class="error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></p>
+    <label for="pubYear" th:text="#{label.year}">Рік</label>
+    <input type="number" th:field="*{pubYear}" required min="1" max="9999" th:errorclass="invalid">
+    <p class="error" th:if="${#fields.hasErrors('pubYear')}" th:errors="*{pubYear}"></p>
+    <div class="actions"><button type="submit" th:text="${editing} ? #{form.save} : #{form.add}">Додати книгу</button>
+      <a th:href="@{/books}" th:text="#{form.cancel}">Скасувати</a></div>
+  </form>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
