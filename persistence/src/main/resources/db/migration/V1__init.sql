@@ -23,7 +23,7 @@ CREATE TABLE comments (
     user_id    BIGINT,
     author     VARCHAR(64)   NOT NULL,
     text       VARCHAR(1000) NOT NULL,
-    created_at TIMESTAMP(9) WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP(6) WITH TIME ZONE NOT NULL,
     -- Many comments -> one book; comments disappear together with the book.
     CONSTRAINT fk_comments_book FOREIGN KEY (book_id) REFERENCES books (id) ON DELETE CASCADE,
     -- Many comments -> one user; comments are kept when the account is deleted.
